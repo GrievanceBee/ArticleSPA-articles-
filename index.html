@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Rapid Housing Navigator – AI-Guided Crisis Pipeline</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<style>
+  :root{
+    --bg:#020617;
+    --bg-soft:#020817;
+    --panel:#0b1120;
+    --accent:#22c55e;
+    --accent-soft:rgba(34,197,94,.18);
+    --accent-strong:rgba(34,197,94,.3);
+    --text:#e5e7eb;
+    --muted:#9ca3af;
+    --border:#1f2937;
+    --danger:#f97373;
+    --warning:#fbbf24;
+    --step-chip:#0f172a;
+    --radius-lg:14px;
+    --radius-md:10px;
+    --shadow-soft:0 18px 45px rgba(0,0,0,.55);
+    --shadow-chip:0 8px 20px rgba(15,23,42,.85);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:radial-gradient(circle at top,#0f172a 0,#020617 48%,#000 100%);
+    color:var(--text);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:960px;
+    margin:0 auto;
+    padding:16px 14px 32px;
+  }
+  header{
+    border-radius:20px;
+    padding:18px 16px 14px;
+    background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(15,23,42,.98));
+    border:1px solid rgba(148,163,184,.3);
+    box-shadow:var(--shadow-soft);
+    position:sticky;
+    top:0;
+    z-index:20;
+    backdrop-filter:blur(18px);
+  }
+  .badge-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+    align-items:center;
+    font-size:.7rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+  }
+  .badge{
+    padding:4px 9px;
+    border-radius:999px;
+    border:1px solid rgba(148,163,184,.5);
+    background:rgba(15,23,42,.75);
+  }
+  .badge.badge-hot{
+    border-color:var(--accent);
+    background:var(--accent-soft);
+    color:#bbf7d0;
+  }
+  h1{
+    font-size:1.25rem;
+    font-weight:650;
+    margin-bottom:4px;
+  }
+  header p{
+    font-size:.82rem;
+    color:var(--muted);
+    max-width:640px;
+  }
+  .header-actions{
+    margin-top:12px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .btn{
+    border:none;
+    outline:none;
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:.8rem;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:var(--accent);
+    color:#022c22;
+    font-weight:600;
+  }
+  .btn-ghost{
+    background:rgba(15,23,42,.9);
+    color:var(--muted);
+    border:1px solid rgba(148,163,184,.45);
+  }
+  .hint-pill{
+    margin-top:8px;
+    font-size:.7rem;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .hint-pill span.key{
+    border-radius:6px;
+    border:1px solid rgba(148,163,184,.45);
+    padding:2px 6px;
+    font-size:.68rem;
+  }
+
+  main{
+    margin-top:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .section{
+    background:var(--bg-soft);
+    border-radius:18px;
+    border:1px solid var(--border);
+    padding:10px;
+  }
+  .section-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    padding:4px 3px 6px;
+  }
+  .section-title{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .section-title h2{
+    font-size:.9rem;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--muted);
+  }
+  .section-title p{
+    font-size:.8rem;
+    color:var(--text);
+  }
+  .phase-chip{
+    background:var(--step-chip);
+    border-radius:999px;
+    padding:4px 9px;
+    font-size:.7rem;
+    color:var(--muted);
+    box-shadow:var(--shadow-chip);
+    border:1px solid rgba(30,64,175,.7);
+  }
+
+  .steps{
+    margin-top:4px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .step{
+    border-radius:14px;
+    background:var(--panel);
+    border:1px solid rgba(30,64,175,.7);
+    padding:10px 10px 8px;
+  }
+  .step-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .step-meta{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .step-tag{
+    font-size:.7rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+  }
+  .step-title{
+    font-size:.9rem;
+    font-weight:600;
+  }
+  .step-badge{
+    font-size:.7rem;
+    padding:3px 7px;
+    border-radius:999px;
+    border:1px solid rgba(148,163,184,.4);
+    color:var(--muted);
+  }
+  .step-body{
+    margin-top:6px;
+    font-size:.78rem;
+    color:var(--muted);
+  }
+  .step-body p{margin-bottom:4px;}
+  .prompt-card{
+    margin-top:6px;
+    border-radius:10px;
+    background:rgba(15,23,42,.95);
+    border:1px solid rgba(148,163,184,.45);
+    padding:6px 6px 4px;
+  }
+  .prompt-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:6px;
+    margin-bottom:4px;
+  }
+  .prompt-header span{
+    font-size:.72rem;
+    color:var(--muted);
+  }
+  .btn-mini{
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid rgba(148,163,184,.5);
+    background:#020617;
+    color:var(--muted);
+    font-size:.7rem;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+  }
+  .code-snippet{
+    font-family:ui-monospace,Menlo,Monaco,"SF Mono",monospace;
+    font-size:.74rem;
+    white-space:pre-wrap;
+    word-break:break-word;
+    background:#020617;
+    border-radius:6px;
+    padding:6px;
+    border:1px dashed rgba(55,65,81,.9);
+    color:#e5e7eb;
+  }
+  .subtasks{
+    margin-top:6px;
+    padding-left:14px;
+  }
+  .subtasks li{
+    font-size:.76rem;
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+  .insight{
+    margin-top:7px;
+    border-radius:10px;
+    background:var(--accent-soft);
+    border:1px solid var(--accent-strong);
+    padding:6px 7px;
+    font-size:.74rem;
+    color:#bbf7d0;
+  }
+  .insight strong{color:#ecfdf5;}
+
+  .status-strip{
+    margin-top:10px;
+    font-size:.7rem;
+    color:var(--muted);
+    border-radius:999px;
+    padding:6px 10px;
+    border:1px dashed rgba(148,163,184,.6);
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+  .status-label{
+    font-size:.68rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+  }
+  .status-chip{
+    padding:3px 7px;
+    border-radius:999px;
+    border:1px solid rgba(148,163,184,.5);
+  }
+
+  footer{
+    margin-top:18px;
+    font-size:.7rem;
+    color:var(--muted);
+    text-align:center;
+    padding:10px 4px 0;
+  }
+
+  @media (min-width:740px){
+    .app{padding:20px 18px 36px;}
+    header{padding:18px 18px 14px;}
+    h1{font-size:1.4rem;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="badge-row">
+      <span class="badge badge-hot">Rapid Housing Navigator</span>
+      <span class="badge">HIV & Medically Vulnerable Friendly</span>
+      <span class="badge">AI-Guided · Non-Technical</span>
+    </div>
+    <h1>AI-Guided Rapid Housing Pipeline</h1>
+    <p>
+      This page walks you, step by step, through getting help with housing when you are unsheltered or at risk,
+      especially if you rely on daily medication (like HIV treatment). Each step has a ready-to-use prompt you can
+      copy into an AI chat (such as ChatGPT) to draft emails, scripts, and documents for you.
+    </p>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="scrollToPhase('phase1')">I’m in crisis – start at Step 1</button>
+      <button class="btn btn-ghost" onclick="scrollToPhase('phase-oversight')">I’m stuck in red tape</button>
+    </div>
+    <div class="hint-pill">
+      <span class="key">Tip</span>
+      <span>Tap “Copy prompt” under any step → paste into your AI chat → get custom letters and scripts instantly.</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- PHASE 1 -->
+    <section class="section" id="phase1">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Phase 1</h2>
+          <p>Document the crisis & your medication risk</p>
+        </div>
+        <div class="phase-chip">Start here if you are unsheltered or about to lose housing.</div>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-header">
+            <div class="step-meta">
+              <div class="step-tag">Step 1</div>
+              <div class="step-title">Write your crisis story once (so you don’t have to keep repeating it)</div>
+            </div>
+            <span class="step-badge">Crisis Snapshot</span>
+          </div>
+          <div class="step-body">
+            <p>This creates a simple “Crisis Summary” you can reuse for every agency, worker, or intake form.</p>
+            <div class="prompt-card">
+              <div class="prompt-header">
+                <span>AI prompt to copy:</span>
+                <button class="btn-mini" onclick="copyPrompt('prompt1')">Copy prompt</button>
+              </div>
+              <div class="code-snippet" id="prompt1">
+Help me write a short, clear Crisis Summary I can reuse with agencies. Ask me:
+- where I slept last night,
+- whether I have any place to sleep tonight,
+- what medication I need to take daily (for example, HIV or other serious conditions),
+- how long I’ve been in this situation,
+- what has already happened with hospitals, clinics, or shelters.
+
+Then, write a 1-page Crisis Summary in plain language that I can copy into emails and forms.
+              </div>
+            </div>
+            <ul class="subtasks">
+              <li>Answer the AI’s questions honestly (no need for perfect wording).</li>
+              <li>Save the Crisis Summary somewhere safe on your phone (Notes, Files, email to yourself).</li>
+              <li>Use the same crisis text again and again instead of starting over each time.</li>
+            </ul>
+            <div class="insight">
+              <strong>Why this matters:</strong> Having one clear written story saves your energy and creates a consistent record
+              that shows this is an ongoing crisis, not a one-time event.
+            </div>
+          </div>
+        </article>
+
+        <article class="step">
+          <div class="step-header">
+            <div class="step-meta">
+              <div class="step-tag">Step 2</div>
+              <div class="step-title">Explain your medication risk (HIV, ART, or other daily treatment)</div>
+            </div>
+            <span class="step-badge">Medical Necessity</span>
+          </div>
+          <div class="step-body">
+            <p>Housing programs and health systems move faster when they see the medical risk clearly.</p>
+            <div class="prompt-card">
+              <div class="prompt-header">
+                <span>AI prompt to copy:</span>
+                <button class="btn-mini" onclick="copyPrompt('prompt2')">Copy prompt</button>
+              </div>
+              <div class="code-snippet" id="prompt2">
+Using my Crisis Summary, help me write a short “Medical Risk Statement” explaining:
+- that I am living with HIV or another serious condition,
+- that I need to take my medication every day (for example: Biktarvy or other ART),
+- why being homeless or unstable makes it hard or unsafe to keep my medication schedule,
+- how this could harm my health if it continues.
+
+Make it 1–2 paragraphs, in plain language, that I can attach to housing and health requests.
+              </div>
+            </div>
+            <ul class="subtasks">
+              <li>Copy the Medical Risk Statement into your notes or email.</li>
+              <li>Include it whenever you ask for a hotel voucher or emergency housing.</li>
+              <li>Tell workers: “This is medically necessary housing, not just a preference.”</li>
+            </ul>
+            <div class="insight">
+              <strong>Key point:</strong> HIV and other serious conditions are protected disabilities. Stabilizing your housing to
+              protect treatment is a reasonable accommodation, not a favor.
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- PHASE 2: CASE MANAGEMENT -->
+    <section class="section" id="phase-case">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Phase 2</h2>
+          <p>Work with your case manager (or clinic social worker)</p>
+        </div>
+        <div class="phase-chip">Use this if you have a case manager or clinic you work with.</div>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-header">
+            <div class="step-meta">
+              <div class="step-tag">Step 3</div>
+              <div class="step-title">Send an urgent request for housing help</div>
+            </div>
+            <span class="step-badge">First Ask</span>
+          </div>
+          <div class="step-body">
+            <p>This creates a focused email or message so your case manager knows it is urgent and medical.</p>
+            <div class="prompt-card">
+              <div class="prompt-header">
+                <span>AI prompt to copy:</span>
+                <button class="btn-mini" onclick="copyPrompt('prompt3')">Copy prompt</button>
+              </div>
+              <div class="code-snippet" id="prompt3">
+Write an email to my case manager asking for immediate help with emergency housing or a hotel voucher.
+
+Use this structure:
+- Brief subject line: “Urgent: Medically Necessary Housing Help Needed”
+- First paragraph: one-sentence summary that I am homeless or about to be, and that I am living with HIV (or another serious condition) and need daily medication.
+- Second paragraph: paste or summarize my Crisis Summary.
+- Third paragraph: paste or summarize my Medical Risk Statement.
+- Final paragraph: clearly request a stabilization or hotel voucher referral today, ask when it will be submitted, and ask them to reply with confirmation.
+
+Use respectful but firm language. Keep it simple and clear.
+              </div>
+            </div>
+            <ul class="subtasks">
+              <li>Copy and send the email to your case manager (or clinic social worker).</li>
+              <li>Take a screenshot after sending, for your records.</li>
+              <li>Note the date and time you sent it.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="step">
+          <div class="step-header">
+            <div class="step-meta">
+              <div class="step-tag">Step 4</div>
+              <div class="step-title">Follow up if no one responds</div>
+            </div>
+            <span class="step-badge">24–48 Hour Rule</span>
+          </div>
+          <div class="step-body">
+            <p>If they do not reply, you need a written follow-up to show you tried.</p>
+            <div class="prompt-card">
+              <div class="prompt-header">
+                <span>AI prompt to copy:</span>
+                <button class="btn-mini" onclick="copyPrompt('prompt4')">Copy prompt</button>
+              </div>
+              <div class="code-snippet" id="prompt4">
+Write a short follow-up email to my case manager.
+
+Explain:
+- I sent an urgent housing request on [DATE],
+- I am still unsheltered or at risk,
+- I need to know whether a referral for emergency housing or hotel voucher has been submitted,
+- I am asking for a quick written update today.
+
+Keep it calm but firm. Mention that this is about my ability to keep taking my medication safely.
+              </div>
+            </div>
+            <ul class="subtasks">
+              <li>Send this follow-up if you have no answer after about 24 hours.</li>
+              <li>If there is still no response after 48 hours, move to the County step in the next phase.</li>
+            </ul>
+            <div class="insight">
+              <strong>Why follow-ups matter:</strong> Written follow-ups prove you asked for help and didn’t simply “drop out.”
+              That evidence is powerful if you later need oversight or legal help.
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- PHASE 3: COUNTY -->
+    <section class="section" id="phase-county">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Phase 3</h2>
+          <p>Bring the County into the loop</p>
+        </div>
+        <div class="phase-chip">Use if your clinic or case manager is slow or unresponsive.</div>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-header">
+            <div class="step-meta">
+              <div class="step-tag">Step 5</div>
+              <div class="step-title">Ask the County to help move things forward</div>
+            </div>
+            <span class="step-badge">County Engagement</span>
+          </div>
+          <div class="step-body">
+            <p>The County often funds or oversees the programs your clinic uses. They can push for action.</p>
+            <div class="prompt-card">
+              <div class="prompt-header">
+                <span>AI prompt to copy:</span>
+                <button class="btn-mini" onclick="copyPrompt('prompt5')">Copy prompt</button>
+              </div>
+              <div class="code-snippet" id="prompt5">
+Help me write an email to my County HIV/housing program.
+
+Include:
+- A short version of my Crisis Summary,
+- A short version of my Medical Risk Statement,
+- The dates I asked my case manager for help,
+- That I have not received timely housing support.
+
+Ask the County to:
+- Confirm they received this message,
+- Help coordinate with my case manager and any HOPWA or hotel voucher program,
+- Treat this as medically necessary stabilization housing, not just a routine request.
+              </div>
+            </div>
+            <ul class="subtasks">
+              <li>Send this to the County HIV program or housing email you have.</li>
+              <li>Call if possible and say: “I also emailed a summary of my situation.”</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- PHASE 4: OVERSIGHT -->
+    <section class="section" id="phase-oversight">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Phase 4</h2>
+          <p>When delays are dangerous: oversight & civil rights</p>
+        </div>
+        <div class="phase-chip">Use this if you’ve been trying and nothing moves.</div>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-header">
+            <div class="step-meta">
+              <div class="step-tag">Step 6</div>
+              <div class="step-title">Prepare oversight letters (HUD, Joint Commission)</div>
+            </div>
+            <span class="step-badge">Oversight</span>
+          </div>
+          <div class="step-body">
+            <p>This turns “I’m struggling” into “Systems may be failing a protected person.”</p>
+            <div class="prompt-card">
+              <div class="prompt-header">
+                <span>AI prompt to copy:</span>
+                <button class="btn-mini" onclick="copyPrompt('prompt6')">Copy prompt</button>
+              </div>
+              <div class="code-snippet" id="prompt6">
+Using my Crisis Summary and Medical Risk Statement, help me draft:
+
+1) A short letter to HUD describing:
+- that I am living with HIV or another serious condition,
+- that I am unsheltered or at high risk,
+- that I requested HOPWA or similar housing help,
+- that delays are putting my treatment at risk.
+
+2) A similar letter to The Joint Commission describing:
+- that my health care system knows I am unsheltered and medically vulnerable,
+- that I have not received timely help with stabilization housing,
+- that this creates a patient safety and continuity-of-care risk.
+
+Make both letters respectful but firm, and in plain language.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="step">
+          <div class="step-header">
+            <div class="step-meta">
+              <div class="step-tag">Step 7</div>
+              <div class="step-title">Prepare or update an OCR civil rights complaint</div>
+            </div>
+            <span class="step-badge">Civil Rights</span>
+          </div>
+          <div class="step-body">
+            <p>OCR enforces civil rights when people with disabilities are blocked or harmed by systems.</p>
+            <div class="prompt-card">
+              <div class="prompt-header">
+                <span>AI prompt to copy:</span>
+                <button class="btn-mini" onclick="copyPrompt('prompt7')">Copy prompt</button>
+              </div>
+              <div class="code-snippet" id="prompt7">
+Help me write text I can use for an HHS Office for Civil Rights (OCR) complaint.
+
+Include:
+- that I am a person living with HIV or another serious medical condition,
+- that my condition is a disability under Federal law (ADA / Section 504 / Section 1557),
+- that I am unsheltered or unstable and this is harming or threatening my treatment,
+- that I asked my providers and local programs for help and experienced serious delay or denial,
+- that this has caused risk or harm.
+
+Write it in clear paragraphs I can paste into the OCR complaint form.
+              </div>
+            </div>
+            <ul class="subtasks">
+              <li>Go to the OCR online complaint form and paste the text the AI creates.</li>
+              <li>Keep your OCR confirmation number somewhere safe.</li>
+            </ul>
+            <div class="insight">
+              <strong>Impact over intent:</strong> OCR focuses on what happened to you (impact), not whether people “meant”
+              to discriminate. Your written record is what matters.
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- PHASE 5: DAILY LOOP -->
+    <section class="section" id="phase-daily">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Phase 5</h2>
+          <p>Daily crisis loop – what to do each day until housed</p>
+        </div>
+        <div class="phase-chip">Repeat daily until you have safe, stable housing.</div>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-header">
+            <div class="step-meta">
+              <div class="step-tag">Step 8</div>
+              <div class="step-title">Ask: “What should I do today?”</div>
+            </div>
+            <span class="step-badge">Daily Checklist</span>
+          </div>
+          <div class="step-body">
+            <p>Use this each morning to keep things moving, even when you’re exhausted.</p>
+            <div class="prompt-card">
+              <div class="prompt-header">
+                <span>AI prompt to copy:</span>
+                <button class="btn-mini" onclick="copyPrompt('prompt8')">Copy prompt</button>
+              </div>
+              <div class="code-snippet" id="prompt8">
+Based on the crisis situation and steps I’ve taken so far, help me create a simple “today” checklist.
+
+Include:
+- who I should follow up with (case manager, County, housing agency),
+- which emails or calls are overdue,
+- whether I should send an escalation or reminder,
+- what to note in my communication log today,
+- one small self-care or safety step I can take.
+
+Make it brief and numbered so I can follow it step by step.
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="status-strip">
+      <span class="status-label">Status Helper</span>
+      <span class="status-chip">Use 1 step at a time – you do not need to do everything in one day.</span>
+      <span class="status-chip">You can reuse these prompts as often as needed.</span>
+    </div>
+  </main>
+
+  <footer>
+    This guide is informational only and does not replace legal or medical advice.  
+    Use it to help you speak up, get support, and keep your treatment safe while you seek housing.
+  </footer>
+</div>
+
+<script>
+function scrollToPhase(id){
+  var el=document.getElementById(id);
+  if(el){el.scrollIntoView({behavior:'smooth',block:'start'});}
+}
+function copyPrompt(id){
+  var el=document.getElementById(id);
+  if(!el) return;
+  var text=el.innerText || el.textContent;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text.trim()).then(function(){
+      alert('Prompt copied. Paste it into your AI chat.');
+    }).catch(function(){
+      fallbackCopy(text);
+    });
+  }else{
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  var ta=document.createElement('textarea');
+  ta.value=text.trim();
+  ta.style.position='fixed';
+  ta.style.top='-1000px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try{document.execCommand('copy');alert('Prompt copied. Paste it into your AI chat.');}
+  catch(e){alert('Copy failed. You can still select and copy manually.');}
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
